@@ -24,7 +24,7 @@ bool MainWindow::is_closed()
     return is_closed_;
 }
 
-void MainWindow::closeEvent(QCloseEvent *e)
+void MainWindow::closeEvent(QCloseEvent */*e*/)
 {
     is_closed_ = true;
 }

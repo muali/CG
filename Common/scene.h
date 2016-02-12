@@ -33,10 +33,10 @@ public:
     }
 
     // Draws the model, and thus all its meshes
-    void Draw()
+    void Draw(QOpenGLShaderProgram const& shader)
     {
         for (GLuint i = 0; i < this->meshes.size(); i++)
-            this->meshes[i].Draw();
+            this->meshes[i].Draw(shader);
     }
 
 private:

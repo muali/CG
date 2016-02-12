@@ -1,5 +1,4 @@
 #include "glwidget.h"
-#include "cubemap.h"
 
 #include <algorithm>
 #include <ctime>
@@ -13,8 +12,7 @@
 glwidget::glwidget(QWidget* parent)
     : QOpenGLWidget(parent)
     , cubemap_shader_(this)
-    , camera_(glm::vec3(0.f, 0.f, 3.f))
-    , skybox_(this)
+    , camera_(glm::vec3(-11.f, 30.f, 80.f))
     , w_pressed(false)
     , s_pressed(false)
     , a_pressed(false)
@@ -29,25 +27,12 @@ void glwidget::initializeGL()
     glewInit();
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    cubemap_shader_.addShaderFromSourceFile(QOpenGLShader::Vertex, "cubemap.vs");
-    cubemap_shader_.addShaderFromSourceFile(QOpenGLShader::Fragment, "cubemap.frag");
+    cubemap_shader_.addShaderFromSourceFile(QOpenGLShader::Vertex, "shaders/shader.vs");
+    cubemap_shader_.addShaderFromSourceFile(QOpenGLShader::Fragment, "shaders/shader.frag");
     cubemap_shader_.link();
     std::string t = cubemap_shader_.log().toStdString();
 
-    skybox_.load();
-
-    std::vector<std::string> skybox_paths = {
-        "skybox/ThickCloudsWaterRight2048.png",
-        "skybox/ThickCloudsWaterLeft2048.png",
-        "skybox/ThickCloudsWaterUp2048.png",
-        "skybox/ThickCloudsWaterDown2048.png",
-        "skybox/ThickCloudsWaterBack2048.png",
-        "skybox/ThickCloudsWaterFront2048.png"
-    };
-
-    cubemap_ = load_cubemap(skybox_paths);
-
-    model_ = std::make_unique<Model>("bunny_with_normals.obj");
+    model_ = std::make_unique<Model>("resource/house.obj");
 }
 
 void glwidget::paintGL()
@@ -69,10 +54,8 @@ void glwidget::paintGL()
     glUniform3f(cubemap_shader_.uniformLocation("cameraPos"),
         camera_.Position.x, camera_.Position.y, camera_.Position.z);
 
-    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_);
     model_->Draw();
 
-    skybox_.draw(cubemap_, view, proj);
 }
 
 void glwidget::do_turn(float dt)
@@ -86,6 +69,10 @@ void glwidget::do_turn(float dt)
     update();
 }
 
+bool glwidget::esc_pressed()
+{
+    return esc_pressed_;
+}
 
 void glwidget::keyPressEvent(QKeyEvent* e)
 {
@@ -93,6 +80,7 @@ void glwidget::keyPressEvent(QKeyEvent* e)
     if (e->text() == "s") s_pressed = true;
     if (e->text() == "a") a_pressed = true;
     if (e->text() == "d") d_pressed = true;
+    if (e->key() == Qt::Key_Escape) esc_pressed_ = true;
 }
 
 void glwidget::keyReleaseEvent(QKeyEvent* e)

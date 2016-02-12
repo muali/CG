@@ -2,7 +2,6 @@
 
 #include "../Common/scene.h"
 #include "../Common/camera.h"
-#include "skybox.h"
 
 #include <memory>
 #include <QOpenGLWidget.h>
@@ -18,6 +17,7 @@ public:
     glwidget(QWidget* parent = nullptr);
 
     void initializeGL() override;
+ //   void resizeGL    (int width, int height)  override;
 	void paintGL() override;
     void keyPressEvent(QKeyEvent * e) override;
     void keyReleaseEvent(QKeyEvent * e) override;
@@ -25,12 +25,12 @@ public:
     void mousePressEvent(QMouseEvent* e) override;
     void mouseReleaseEvent(QMouseEvent* e) override;
     void do_turn(float dt);
+    bool esc_pressed();
 
 private:
     std::unique_ptr<Model> model_;
     QOpenGLShaderProgram cubemap_shader_;
     Camera camera_;
-    skybox skybox_;
 
     QPoint last_mouse_pos;
     QPoint mouse_dif_;
@@ -39,5 +39,4 @@ private:
     bool d_pressed;
     bool a_pressed;
     bool esc_pressed_;
-    GLuint cubemap_;
 };

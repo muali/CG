@@ -8,3 +8,4 @@ release
 /packages/Assimp.redist.3.0.0
 /HW02/*.filters
 /HW02/*.user
+/*.opensdf

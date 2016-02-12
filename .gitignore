@@ -1,11 +1,11 @@
 /CG.sdf
 debug
 release
-/HW01/*.user
-/HW01/*.filters
 /CG.v12.suo
 /packages/Assimp.3.0.0
 /packages/Assimp.redist.3.0.0
-/HW02/*.filters
-/HW02/*.user
+*.filters
+*.user
 /*.opensdf
+glew.v140.1.12.0
+glm.0.9.7.1

@@ -1,0 +1,1 @@
+"%VS120COMNTOOLS%..\..\VC\vcvarsall.bat" amd64 && qmake -tp vc -r %1 && pause

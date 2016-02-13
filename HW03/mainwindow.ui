@@ -20,12 +20,15 @@
      <verstretch>1</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <property name="sizeConstraint">
-     <enum>QLayout::SetNoConstraint</enum>
-    </property>
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,1">
     <item>
      <widget class="glwidget" name="openGLWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
         <width>500</width>
@@ -33,6 +36,101 @@
        </size>
       </property>
      </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+      <item>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="title">
+         <string>GroupBox</string>
+        </property>
+        <widget class="QRadioButton" name="nearestRadioButton">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>82</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Nearest</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="linearRadioButton">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>50</y>
+           <width>82</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Linear</string>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="linearMipmapRadioButton">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>80</y>
+           <width>82</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Linear mipmap</string>
+         </property>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_2">
+        <property name="title">
+         <string>GroupBox</string>
+        </property>
+        <widget class="QRadioButton" name="staticRadioButton">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>82</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>static</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="dynamicRadioButton">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>50</y>
+           <width>82</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>dynamic</string>
+         </property>
+        </widget>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -65,5 +163,86 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>linearMipmapRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>mipmap_toogled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>566</x>
+     <y>131</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>258</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nearestRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>nearest_toogled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>566</x>
+     <y>71</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>258</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>linearRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>linear_toogled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>566</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>258</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>staticRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>static_toogled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>566</x>
+     <y>323</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>258</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dynamicRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>dynamic_toogled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>566</x>
+     <y>353</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>258</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

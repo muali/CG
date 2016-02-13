@@ -1,14 +1,20 @@
+Uninstall-Package assimp -ProjectName Common
 Uninstall-Package assimp -ProjectName HW02
 Uninstall-Package assimp -ProjectName HW03
+Uninstall-Package glew.v140 -ProjectName Common
 Uninstall-Package glew.v140 -ProjectName HW02
 Uninstall-Package glew.v140 -ProjectName HW03
+Uninstall-Package glm -ProjectName Common
 Uninstall-Package glm -ProjectName HW02
 Uninstall-Package glm -ProjectName HW03
 
+Install-Package assimp -ProjectName Common
 Install-Package assimp -ProjectName HW02
 Install-Package assimp -ProjectName HW03
+Install-Package glew.v140 -ProjectName Common
 Install-Package glew.v140 -ProjectName HW02
 Install-Package glew.v140 -ProjectName HW03
+Install-Package glm -ProjectName Common
 Install-Package glm -ProjectName HW02
 Install-Package glm -ProjectName HW03
 

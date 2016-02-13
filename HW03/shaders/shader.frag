@@ -1,23 +1,17 @@
 #version 330
 
-in vec2 TexCoords;
-in vec4 ProjCoords;
+in vec2 tex_coords;
+in vec4 proj_coords;
 
 out vec4 color;
 
 uniform sampler2D texture_diffuse1;
-uniform sampler2D texture_specular1;
 
-uniform sampler2D projectiveTexture;
+uniform sampler2D projective_texture;
 
 void main()
 {
-	vec4 diffuse_color = texture(texture_diffuse1, TexCoords);
-	vec2 ndc = (ProjCoords.xy / ProjCoords.w) / 2.0 + 0.5;
-	vec4 proj_color = vec4(0.0);
-	if (ProjCoords.q > 0.0)
-	{
-		proj_color = texture(projectiveTexture, vec2(ndc.x, 1.0 - ndc.y));
-	}
-	color = diffuse_color + 0.4 * proj_color;
+	vec2 ndc = (proj_coords.xy / proj_coords.w) / 2.0 + 0.5;
+	vec4 proj_color = texture(projective_texture, vec2(ndc.x, 1.0 - ndc.y));
+	color = texture(texture_diffuse1, tex_coords) + 0.4 * proj_color;
 }

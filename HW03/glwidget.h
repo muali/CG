@@ -26,8 +26,14 @@ public:
     void mouseReleaseEvent(QMouseEvent* e) override;
     void do_turn(float dt);
 
+public slots:
+    void nearest_toogled(bool);
+    void linear_toogled(bool);
+    void mipmap_toogled(bool);
+    void static_toogled(bool);
+    void dynamic_toogled(bool);
+
 private:
-    void draw_cameras(glm::mat4 const &view, glm::mat4 const &proj, glm::mat4 const &model);
 
     std::unique_ptr<Model> model_;
     std::vector<glm::vec3> cam_vertices_;
@@ -40,9 +46,13 @@ private:
 
     Camera camera_;
     Camera static_proj_;
-    Camera dynamic_proj_;
 
     GLuint static_text_;
+    GLuint frame_buffer_;
+    GLuint dyn_tex_;
+
+    bool use_static_;
+    GLuint filter_;
 
     QPoint last_mouse_pos;
     QPoint mouse_dif_;
@@ -50,7 +60,9 @@ private:
     bool s_pressed;
     bool d_pressed;
     bool a_pressed;
+    GLfloat angle_;
 
     const float cam_near_ = 0.1f;
-    const float cam_far_ = 100.f;
+    const float cam_far_ = 1000.f;
+    const GLuint dyn_tex_size_ = 1024;
 };

@@ -70,7 +70,7 @@ void glwidget::paintGL()
         camera_.Position.x, camera_.Position.y, camera_.Position.z);
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_);
-    model_->Draw();
+    model_->Draw(cubemap_shader_);
 
     skybox_.draw(cubemap_, view, proj);
 }

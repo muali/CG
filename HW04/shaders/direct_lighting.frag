@@ -41,6 +41,6 @@ void main()
     vec3 ambient = light.ambient * Diffuse;
     vec3 diffuse = light.diffuse * diff * Diffuse;
     vec3 specular = light.specular * spec * Specular;
-    color = vec4(ambient + diffuse + specular, 1.);
-	//color.rgb = -light.direction;
+    //color = vec4(ambient + diffuse + specular, 1.);
+	color.rgb = Diffuse;
 }

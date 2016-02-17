@@ -41,6 +41,39 @@ void RenderQuad()
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 }
+
+point_light generate_point_light()
+{
+    point_light result;
+
+    result.x_r = 30 - (rand() % 10);
+    result.y_r = 5;
+    result.z_r = 30 - (rand() % 10);
+
+    result.a = rand() % 5 + 1;
+    result.b = rand() % 5 + 1;
+    result.c = 2 * glm::pi<GLfloat>() / (rand() % 10 + 1);
+    result.d = 2 * glm::pi<GLfloat>() / (rand() % 10 + 1);
+
+    result.mid_x = -12.5;
+    result.mid_y = 16;
+    result.mid_z = 16.5;
+
+    result.color.r = ((rand() % 100) / 200.f) + 0.5;
+    result.color.g = ((rand() % 100) / 200.f) + 0.5;
+    result.color.b = ((rand() % 100) / 200.f) + 0.5;
+
+    return result;
+}
+
+glm::vec3 get_position(GLfloat t, point_light const &p)
+{
+    return glm::vec3(
+        p.x_r * cos(p.a * t) * cos(p.c * t) + p.mid_x,
+        p.y_r * cos(p.a * t) * sin(p.d * t) + p.mid_y,
+        p.z_r * sin(p.b * t) + p.mid_z);
+}
+
 } //unnamed
 
 glwidget::glwidget(QWidget* parent)
@@ -48,14 +81,19 @@ glwidget::glwidget(QWidget* parent)
     , buffer_shader_(this)
     , direct_lighting_shader_(this)
     , point_lighting_shader_(this)
+    , normal_shader_(this)
     , camera_(glm::vec3(-11.f, 30.f, 80.f))
     , w_pressed(false)
     , s_pressed(false)
     , a_pressed(false)
     , d_pressed(false)
+    , t_(0.)
+    , draw_spheres_(false)
+    , lights_count_(1)
 {
     setFocusPolicy(Qt::StrongFocus);
     setMouseTracking(false);
+    srand(10);
 }
 
 void glwidget::initializeGL()
@@ -131,14 +169,21 @@ void glwidget::initializeGL()
     point_lighting_shader_.setUniformValue("gNormal", 1);
     point_lighting_shader_.setUniformValue("gAlbedoSpec", 2);
 
+    normal_shader_.addShaderFromSourceFile(QOpenGLShader::Vertex, "shaders/normal_mapping.vs");
+    normal_shader_.addShaderFromSourceFile(QOpenGLShader::Fragment, "shaders/normal_mapping.frag");
+    normal_shader_.bind();
+    normal_shader_.setUniformValue("normalMap", 30);
+
     scene_ = std::make_unique<Model>("resources/house.obj");
     sphere_ = std::make_unique<Model>("resources/sphere.obj");
+    plane_ = std::make_unique<Model>("resources/plane.obj");
 
-    point_lights_.push_back(point_light{ glm::vec3(-44.f, 17.f, 41.f), glm::vec3(1.f, 0.f, 0.f) });
-    point_lights_.push_back(point_light{ glm::vec3(-35.f, 16.5f, 23.7f), glm::vec3(0.f, 1.f, 0.f) });
-    point_lights_.push_back(point_light{ glm::vec3(-30.f, 16.5f, 23.7f), glm::vec3(0.f, 0.f, 1.f) });
-    point_lights_.push_back(point_light{ glm::vec3(-35.f, 16.5f, 40.f), glm::vec3(0.f, 1.f, 1.f) });
-    point_lights_.push_back(point_light{ glm::vec3(-40.f, 16.5f, 20.f), glm::vec3(1.f, 1.f, 1.f) });
+    normal_map_ = TextureFromFile("brickwall_normal.jpg", "resources");
+
+    for (size_t i = 0; i < max_lights_; ++i)
+        point_lights_.push_back(generate_point_light());
+
+
 }
 
 void glwidget::paintGL()
@@ -150,13 +195,51 @@ void glwidget::paintGL()
     glm::mat4 projection = glm::perspective(camera_.Zoom, (float)width() / height(), 0.1f, 100.0f);
     glm::mat4 view = camera_.GetViewMatrix();
     glm::mat4 model;
-    model = glm::translate(model, glm::vec3(0.f, -1.f, 0.f));
-    model = glm::scale(model, glm::vec3(10.f, 10.f, 10.f));
-    buffer_shader_.bind();
+    //model = glm::translate(model, glm::vec3(0.f, -1.f, 0.f));
+    //model = glm::scale(model, glm::vec3(10.f, 10.f, 10.f));
+    //buffer_shader_.bind();
+    //glUniformMatrix4fv(buffer_shader_.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    //glUniformMatrix4fv(buffer_shader_.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
+    //glUniformMatrix4fv(buffer_shader_.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
+    //scene_->Draw(buffer_shader_);
+
+    normal_shader_.bind();
+//    normal_shader_.setUniformValue("normal_map", 10);
+    glActiveTexture(GL_TEXTURE30);
+    glBindTexture(GL_TEXTURE_2D, normal_map_);
     glUniformMatrix4fv(buffer_shader_.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
     glUniformMatrix4fv(buffer_shader_.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(buffer_shader_.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
-    scene_->Draw(buffer_shader_);
+    plane_->Draw(normal_shader_);
+
+    if (draw_spheres_)
+    {
+        buffer_shader_.bind();
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        for (size_t i = 0; i < lights_count_; ++i)
+        {
+            auto& light = point_lights_[i];
+            GLfloat constant = 1.0;
+            GLfloat linear = 0.7;
+            GLfloat quadratic = 1.8;
+            GLfloat lightMax = std::fmaxf(std::fmaxf(light.color.r, light.color.g), light.color.b);
+            GLfloat radius =
+                (-linear + std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0 / 5.0) * lightMax)))
+                / (2 * quadratic);
+
+            glm::vec3 pos = get_position(t_, light);
+
+            model = glm::translate(glm::mat4(), pos);
+            model = glm::scale(model, glm::vec3(radius));
+            glm::mat4 transform = projection * view * model;
+            
+            glUniformMatrix4fv(buffer_shader_.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
+
+            sphere_->Draw(buffer_shader_);
+        }
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
    
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
     // 2. Lighting Pass: calculate lighting by iterating over a screen filled quad pixel-by-pixel using the gbuffer's content.
@@ -180,28 +263,33 @@ void glwidget::paintGL()
     RenderQuad();
 
     point_lighting_shader_.bind();
+    glPolygonMode(GL_BACK, GL_FILL);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, position_tex_);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, normal_tex_);
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, albedo_tex_);
-    for (auto& light : point_lights_)
+    for (size_t i = 0; i < lights_count_; ++i)
     {
+        auto& light = point_lights_[i];
         GLfloat constant = 1.0;
-        GLfloat linear = 0.22;
-        GLfloat quadratic = 0.20;
+        GLfloat linear = 0.7;
+        GLfloat quadratic = 1.8;
         GLfloat lightMax = std::fmaxf(std::fmaxf(light.color.r, light.color.g), light.color.b);
         GLfloat radius =
             (-linear + std::sqrtf(linear * linear - 4 * quadratic * (constant - (256.0 / 5.0) * lightMax)))
             / (2 * quadratic);
 
-        model = glm::translate(glm::mat4(), light.position);
+        glm::vec3 pos = get_position(t_, light);
+        assert(pos.x > -50.);
+
+        model = glm::translate(glm::mat4(), pos);
         model = glm::scale(model, glm::vec3(radius));
         glm::mat4 transform = projection * view * model;
         
         glUniformMatrix4fv(point_lighting_shader_.uniformLocation("transform"), 1, GL_FALSE, glm::value_ptr(transform));
-        point_lighting_shader_.setUniformValue("light.Position", light.position.x, light.position.y, light.position.z);
+        point_lighting_shader_.setUniformValue("light.Position", pos.x, pos.y, pos.z);
         point_lighting_shader_.setUniformValue("light.Color", light.color.r, light.color.g, light.color.b);
         point_lighting_shader_.setUniformValue("light.Linear", linear);
         point_lighting_shader_.setUniformValue("light.Quadratic", quadratic);
@@ -212,14 +300,27 @@ void glwidget::paintGL()
         sphere_->Draw(point_lighting_shader_);
     }
 
-    glDepthMask(true);
     glDisable(GL_BLEND);
+    glDepthMask(true);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    std::string t = point_lighting_shader_.log().toStdString();
+    std::string t = normal_shader_.log().toStdString();
+}
+
+void glwidget::set_draw_spheres(bool draw_spheres)
+{
+    draw_spheres_ = draw_spheres;
+}
+
+void glwidget::set_light_count(int value)
+{
+    lights_count_ = value;
 }
 
 void glwidget::do_turn(float dt)
 {
+    t_ += dt / 10;
+    if (t_ > 2 * glm::pi<float>()) t_ -= 2 * glm::pi<float>();
     if (w_pressed) camera_.ProcessKeyboard(FORWARD, dt);
     if (s_pressed) camera_.ProcessKeyboard(BACKWARD, dt);
     if (d_pressed) camera_.ProcessKeyboard(RIGHT, dt);

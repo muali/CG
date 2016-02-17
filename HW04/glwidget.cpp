@@ -89,6 +89,8 @@ glwidget::glwidget(QWidget* parent)
     , d_pressed(false)
     , t_(0.)
     , draw_spheres_(false)
+    , use_normal_mapping_(false)
+    , use_directional_lighting_(true)
     , lights_count_(1)
 {
     setFocusPolicy(Qt::StrongFocus);
@@ -195,23 +197,27 @@ void glwidget::paintGL()
     glm::mat4 projection = glm::perspective(camera_.Zoom, (float)width() / height(), 0.1f, 100.0f);
     glm::mat4 view = camera_.GetViewMatrix();
     glm::mat4 model;
-    //model = glm::translate(model, glm::vec3(0.f, -1.f, 0.f));
-    //model = glm::scale(model, glm::vec3(10.f, 10.f, 10.f));
-    //buffer_shader_.bind();
-    //glUniformMatrix4fv(buffer_shader_.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-    //glUniformMatrix4fv(buffer_shader_.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
-    //glUniformMatrix4fv(buffer_shader_.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
-    //scene_->Draw(buffer_shader_);
-
-    normal_shader_.bind();
-//    normal_shader_.setUniformValue("normal_map", 10);
-    glActiveTexture(GL_TEXTURE30);
-    glBindTexture(GL_TEXTURE_2D, normal_map_);
-    glUniformMatrix4fv(buffer_shader_.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-    glUniformMatrix4fv(buffer_shader_.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(buffer_shader_.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
-    plane_->Draw(normal_shader_);
-
+    if (use_normal_mapping_)
+    {
+        normal_shader_.bind();
+        glActiveTexture(GL_TEXTURE30);
+        glBindTexture(GL_TEXTURE_2D, normal_map_);
+        glUniformMatrix4fv(buffer_shader_.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(buffer_shader_.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(buffer_shader_.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
+        plane_->Draw(normal_shader_);
+    }
+    else
+    {
+        model = glm::translate(model, glm::vec3(0.f, -1.f, 0.f));
+        model = glm::scale(model, glm::vec3(10.f, 10.f, 10.f));
+        buffer_shader_.bind();
+        glUniformMatrix4fv(buffer_shader_.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(buffer_shader_.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(buffer_shader_.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
+        scene_->Draw(buffer_shader_);
+    }
+    
     if (draw_spheres_)
     {
         buffer_shader_.bind();
@@ -233,6 +239,8 @@ void glwidget::paintGL()
             model = glm::scale(model, glm::vec3(radius));
             glm::mat4 transform = projection * view * model;
             
+            glUniformMatrix4fv(buffer_shader_.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+            glUniformMatrix4fv(buffer_shader_.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
             glUniformMatrix4fv(buffer_shader_.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
 
             sphere_->Draw(buffer_shader_);
@@ -250,17 +258,21 @@ void glwidget::paintGL()
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
 
-    direct_lighting_shader_.bind();
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, position_tex_);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, normal_tex_);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, albedo_tex_);
-    // Also send light relevant uniforms
-    direct_lighting_shader_.setUniformValue("viewPos", camera_.Position.x, camera_.Position.y, camera_.Position.z);
-    // Finally render quad
-    RenderQuad();
+    if (use_directional_lighting_)
+    {
+        direct_lighting_shader_.bind();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, position_tex_);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, normal_tex_);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, albedo_tex_);
+        // Also send light relevant uniforms
+        direct_lighting_shader_.setUniformValue("viewPos", camera_.Position.x, camera_.Position.y, camera_.Position.z);
+        // Finally render quad
+        RenderQuad();
+    }
+
 
     point_lighting_shader_.bind();
     glPolygonMode(GL_BACK, GL_FILL);
@@ -317,10 +329,19 @@ void glwidget::set_light_count(int value)
     lights_count_ = value;
 }
 
+void glwidget::set_normal_mapping(bool value)
+{
+    use_normal_mapping_ = value;
+}
+
+void glwidget::set_directional_lighting(bool value)
+{
+    use_directional_lighting_ = value;
+}
+
 void glwidget::do_turn(float dt)
 {
     t_ += dt / 10;
-    if (t_ > 2 * glm::pi<float>()) t_ -= 2 * glm::pi<float>();
     if (w_pressed) camera_.ProcessKeyboard(FORWARD, dt);
     if (s_pressed) camera_.ProcessKeyboard(BACKWARD, dt);
     if (d_pressed) camera_.ProcessKeyboard(RIGHT, dt);

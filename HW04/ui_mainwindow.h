@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.4.0
+** Created by: Qt User Interface Compiler version 5.5.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -21,6 +21,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QSlider>
+#include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
@@ -40,6 +41,9 @@ public:
     QLabel *label;
     QSlider *lightSlider;
     QCheckBox *drawSpheresBox;
+    QCheckBox *normalBox;
+    QCheckBox *directionalBox;
+    QSpacerItem *verticalSpacer;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -78,6 +82,7 @@ public:
         formLayout = new QFormLayout();
         formLayout->setSpacing(6);
         formLayout->setObjectName(QStringLiteral("formLayout"));
+        formLayout->setSizeConstraint(QLayout::SetMinimumSize);
         label = new QLabel(centralWidget);
         label->setObjectName(QStringLiteral("label"));
 
@@ -98,7 +103,22 @@ public:
 
         verticalLayout->addWidget(drawSpheresBox);
 
-        verticalLayout->setStretch(1, 1);
+        normalBox = new QCheckBox(centralWidget);
+        normalBox->setObjectName(QStringLiteral("normalBox"));
+
+        verticalLayout->addWidget(normalBox);
+
+        directionalBox = new QCheckBox(centralWidget);
+        directionalBox->setObjectName(QStringLiteral("directionalBox"));
+        directionalBox->setChecked(true);
+
+        verticalLayout->addWidget(directionalBox);
+
+        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+        verticalLayout->addItem(verticalSpacer);
+
+        verticalLayout->setStretch(4, 1);
 
         horizontalLayout->addLayout(verticalLayout);
 
@@ -118,6 +138,8 @@ public:
         retranslateUi(MainWindow);
         QObject::connect(drawSpheresBox, SIGNAL(clicked(bool)), openGLWidget, SLOT(set_draw_spheres(bool)));
         QObject::connect(lightSlider, SIGNAL(valueChanged(int)), openGLWidget, SLOT(set_light_count(int)));
+        QObject::connect(normalBox, SIGNAL(clicked(bool)), openGLWidget, SLOT(set_normal_mapping(bool)));
+        QObject::connect(directionalBox, SIGNAL(clicked(bool)), openGLWidget, SLOT(set_directional_lighting(bool)));
 
         QMetaObject::connectSlotsByName(MainWindow);
     } // setupUi
@@ -127,6 +149,8 @@ public:
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", 0));
         label->setText(QApplication::translate("MainWindow", "lights count", 0));
         drawSpheresBox->setText(QApplication::translate("MainWindow", "draw spheres", 0));
+        normalBox->setText(QApplication::translate("MainWindow", "use normal mapping", 0));
+        directionalBox->setText(QApplication::translate("MainWindow", "directional lighting", 0));
     } // retranslateUi
 
 };

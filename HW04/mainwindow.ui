@@ -41,9 +41,12 @@
      </widget>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,1">
       <item>
        <layout class="QFormLayout" name="formLayout">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetMinimumSize</enum>
+        </property>
         <item row="0" column="0">
          <widget class="QLabel" name="label">
           <property name="text">
@@ -69,6 +72,36 @@
          <string>draw spheres</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="normalBox">
+        <property name="text">
+         <string>use normal mapping</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="directionalBox">
+        <property name="text">
+         <string>directional lighting</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>
@@ -111,8 +144,8 @@
    <slot>set_draw_spheres(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>860</x>
-     <y>52</y>
+     <x>988</x>
+     <y>101</y>
     </hint>
     <hint type="destinationlabel">
      <x>408</x>
@@ -129,6 +162,38 @@
     <hint type="sourcelabel">
      <x>932</x>
      <y>53</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>408</x>
+     <y>341</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>normalBox</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>set_normal_mapping(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>902</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>408</x>
+     <y>341</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>directionalBox</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>set_directional_lighting(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>902</x>
+     <y>127</y>
     </hint>
     <hint type="destinationlabel">
      <x>408</x>

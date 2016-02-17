@@ -37,6 +37,8 @@ public:
 public slots:
     void set_draw_spheres(bool);
     void set_light_count(int);
+    void set_normal_mapping(bool);
+    void set_directional_lighting(bool);
 
 private:
     std::unique_ptr<Model> scene_;
@@ -68,6 +70,8 @@ private:
 
     GLfloat t_;
     bool draw_spheres_;
+    bool use_normal_mapping_;
+    bool use_directional_lighting_;
     size_t lights_count_;
 
     QPoint last_mouse_pos;

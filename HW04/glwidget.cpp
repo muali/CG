@@ -202,9 +202,9 @@ void glwidget::paintGL()
         normal_shader_.bind();
         glActiveTexture(GL_TEXTURE30);
         glBindTexture(GL_TEXTURE_2D, normal_map_);
-        glUniformMatrix4fv(buffer_shader_.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(buffer_shader_.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(buffer_shader_.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(normal_shader_.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(normal_shader_.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(normal_shader_.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
         plane_->Draw(normal_shader_);
     }
     else
